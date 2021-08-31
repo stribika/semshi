@@ -82,6 +82,9 @@ function! semshi#buffer_detach()
 endfunction
 
 function! semshi#init()
+    if !exists('g:loaded_remote_plugins')
+      runtime! plugin/rplugin.vim
+    endif
     hi def semshiLocal           ctermfg=209 guifg=#ff875f
     hi def semshiGlobal          ctermfg=214 guifg=#ffaf00
     hi def semshiImported        ctermfg=214 guifg=#ffaf00 cterm=bold gui=bold
