@@ -107,7 +107,7 @@ class Visitor:
                 self._visit_args(node)
                 self._mark_self(node)
         # Either make a new block scope...
-        if type_ in BLOCKS:
+        if type_ in BLOCKS and len(self._table_stack) > 0:
             current_table = self._table_stack.pop()
             self._table_stack += reversed(current_table.get_children())
             self._env.append(current_table)
