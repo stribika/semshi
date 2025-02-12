@@ -37,6 +37,7 @@ class Node:
     __slots__ = ['id', 'name', 'lineno', 'col', 'end', 'env',
                  'symname', 'symbol', 'hl_group', 'target', '_tup']
 
+    # pylint: disable=too-many-positional-arguments
     def __init__(self, name, lineno, col, env, target=None, hl_group=None):
         self.id = next(Node.id_counter)
         self.name = name
@@ -56,9 +57,7 @@ class Node:
             except KeyError as exc:
                 # Set dummy hl group, so all fields in __repr__ are defined.
                 self.hl_group = '?'
-                raise Exception(
-                    '%s can\'t lookup "%s"' % (self, self.symname)
-                ) from exc
+                raise KeyError(f'{self:s} can\'t lookup "{self.symname:s}"') from exc
         if hl_group is not None:
             self.hl_group = hl_group
         else:
@@ -80,14 +79,9 @@ class Node:
         return hash(self._tup)
 
     def __repr__(self):
-        return '<%s %s %s (%s, %s) %d>' % (
-            self.name,
-            self.hl_group[6:],
-            '.'.join([x.get_name() for x in self.env]),
-            self.lineno,
-            self.col,
-            self.id,
-        )
+        env_names = '.'.join([x.get_name() for x in self.env])
+        hl_group = self.hl_group[6:]
+        return f'<{self.name} {hl_group} {env_names} ({self.lineno}, {self.col}) {self.id}>'
 
     def _make_hl_group(self):
         """Return highlight group the node belongs to."""

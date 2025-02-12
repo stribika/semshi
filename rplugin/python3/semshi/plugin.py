@@ -123,7 +123,7 @@ class Plugin:
         try:
             func = _subcommands[args[0]]
         except KeyError:
-            self.echo_error('Subcommand not found: %s' % args[0])
+            self.echo_error(f'Subcommand not found: {args[0]}')
             return
         func(self, *args[1:])
 
@@ -188,14 +188,7 @@ class Plugin:
 
     @subcommand
     def status(self):
-        self.echo(
-            'current handler: {handler}\n'
-            'handlers: {handlers}'
-            .format(
-                handler=self._cur_handler,
-                handlers=self._handlers
-            )
-        )
+        self.echo(f'current handler: {self._cur_handler,}\nhandlers: {self._handlers}')
 
     def _select_handler(self, buf_or_buf_num):
         """Select handler for `buf_or_buf_num`."""
@@ -224,8 +217,7 @@ class Plugin:
             handler = self._handlers.pop(buf_num)
         except KeyError:
             return
-        else:
-            handler.shutdown()
+        handler.shutdown()
 
     def _update_viewport(self, start, stop):
         self._cur_handler.viewport(start, stop)
@@ -285,6 +277,4 @@ class Options:
             return [hl_groups[g] for g in items]
         except KeyError as e:
             # TODO Use err_write instead?
-            raise Exception(
-                '"%s" is an unknown highlight group.' % e.args[0]
-            ) from e
+            raise KeyError(f'"{e.args[0]}" is an unknown highlight group.') from e

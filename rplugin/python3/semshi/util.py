@@ -23,7 +23,7 @@ def debug_time(label_or_callable=None, detail=None):
                     label = func.__name__
                 except AttributeError:
                     label = func.__class__.__name__
-            text = 'TIME %s: %f ' % (label, time.time() - t)
+            text = f'TIME {label}: {time.time() - t:f} '
             if detail is not None:
                 if callable(detail):
                     text += detail(*args, **kwargs)

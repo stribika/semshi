@@ -43,7 +43,7 @@ class BufferHandler:
         self._selected_nodes = []
 
     def __repr__(self):
-        return '<BufferHandler(%d)>' % self._buf_num
+        return f'<BufferHandler({self._buf_num:d})>'
 
     def viewport(self, start, stop):
         """Set viewport to line range from `start` to `stop` and add highlights
@@ -194,7 +194,7 @@ class BufferHandler:
         return visible, hidden
 
     # pylint: disable=protected-access
-    @debug_time(None, lambda s, n: '%d / %d' % (len(n), len(s._pending_nodes)))
+    @debug_time(None, lambda s, n: f'{len(n):d} / {len(s._pending_nodes):d}')
     def _remove_from_pending(self, nodes):
         """Return nodes which couldn't be removed from the pending list (which
         means they need to be cleared from the buffer).
@@ -243,22 +243,20 @@ class BufferHandler:
 
     def _place_sign(self, id, line, name):
         self._wrap_async(self._vim.command)(
-            'sign place %d line=%d name=%s buffer=%d' % (
-                id, line, name, self._buf_num),
+            f'sign place {id:d} line={line:d} name={name:s} buffer={self._buf_num:d}',
             async_=True)
 
     def _unplace_sign(self, id):
         self._wrap_async(self._vim.command)(
-            'sign unplace %d buffer=%d' % (
-                id, self._buf_num),
+            f'sign unplace {id:d} buffer={self._buf_num:d}',
             async_=True)
 
-    @debug_time(None, lambda _, a, c: '+%d, -%d' % (len(a), len(c)))
+    @debug_time(None, lambda _, a, c: f'+{len(a):d}, -{len(c):d}')
     def _update_hls(self, add, clear):
         self._add_hls(nodes_to_hl(add))
         self._clear_hls(nodes_to_hl(clear, clear=True))
 
-    @debug_time(None, lambda _, nodes: '%d nodes' % len(nodes))
+    @debug_time(None, lambda _, nodes: f'{len(nodes):d} nodes')
     def _add_hls(self, node_or_nodes):
         buf = self._buf
         if not node_or_nodes:
@@ -269,7 +267,7 @@ class BufferHandler:
         self._call_atomic_async(
             [('nvim_buf_add_highlight', (buf, *n)) for n in node_or_nodes])
 
-    @debug_time(None, lambda _, nodes: '%d nodes' % len(nodes))
+    @debug_time(None, lambda _, nodes: f'{len(nodes):d} nodes')
     def _clear_hls(self, node_or_nodes):
         buf = self._buf
         if not node_or_nodes:
@@ -304,7 +302,7 @@ class BufferHandler:
         ))
         num = len(nodes)
         if new_name is None:
-            new_name = self._vim.eval('input("Rename %d nodes to: ")' % num)
+            new_name = self._vim.eval(f'input("Rename {num:d} nodes to: ")')
             # Can't output a carriage return via out_write()
             self._vim.command('echo "\r"')
         if not new_name or new_name == cur_node.name:
@@ -322,7 +320,7 @@ class BufferHandler:
                         line[node.col + len(node.name) + offset:])
                 offset += len(new_name) - len(node.name)
             self._buf[lineno - 1] = line
-        self._vim.out_write('%d nodes renamed.\n' % num)
+        self._vim.out_write(f'{num:d} nodes renamed.\n')
 
     def goto(self, what, direction=None):
         """Go to next location of type `what` in direction `direction`."""
@@ -346,7 +344,7 @@ class BufferHandler:
         elif what in hl_groups:
             locs = self._parser.locations_by_hl_group(hl_groups[what])
         else:
-            raise ValueError('"%s" is not a recognized element type.' % what)
+            raise ValueError(f'"{what:s}" is not a recognized element type.')
         if not locs:
             return
         if direction == 'first':
@@ -381,8 +379,7 @@ class BufferHandler:
         if error is None:
             self._vim.out_write('No syntax error to show.\n')
             return
-        self._vim.out_write('Syntax error: %s (%d, %d)\n' %
-                            (error.msg, error.lineno, error.offset))
+        self._vim.out_write(f'Syntax error: {error.msg:s} ({error.lineno:d}, {error.offset:d})\n')
 
     def shutdown(self):
         # Cancel the error timer so vim quits immediately

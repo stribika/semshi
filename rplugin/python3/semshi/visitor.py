@@ -2,8 +2,7 @@
 from ast import (AsyncFunctionDef, Attribute, ClassDef, DictComp, Eq,
                  ExceptHandler, FunctionDef, GeneratorExp, Global, Gt, GtE,
                  Import, ImportFrom, Lambda, ListComp, Load, Lt, LtE, Module,
-                 Name, NameConstant, Nonlocal, NotEq, Num, SetComp, Store, Str,
-                 Try, arg)
+                 Name, Constant, Nonlocal, NotEq, SetComp, Store, Try, arg)
 from itertools import count
 import sys
 from token import NAME, OP
@@ -17,12 +16,7 @@ BLOCKS = (Module, FunctionDef, AsyncFunctionDef, ClassDef, ListComp, DictComp,
           SetComp, GeneratorExp, Lambda)
 FUNCTION_BLOCKS = (FunctionDef, Lambda, AsyncFunctionDef)
 # Node types which don't require any action
-if sys.version_info < (3, 8):
-    SKIP = (NameConstant, Str, Num)
-else:
-    from ast import Constant # pylint: disable=ungrouped-imports
-    SKIP = (Constant,)
-SKIP += (Store, Load, Eq, Lt, Gt, NotEq, LtE, GtE)
+SKIP = (Constant, Store, Load, Eq, Lt, Gt, NotEq, LtE, GtE)
 
 
 def tokenize_lines(lines):
@@ -36,13 +30,15 @@ def advance(tokens, s=None, type=NAME):
     matching one of the strings in `s` if `s` is an iterable. Without any
     arguments, just advances to next NAME token.
     """
-    if s is None:
-        cond = lambda token: True
-    elif isinstance(s, str):
-        cond = lambda token: token.string == s
-    else:
-        cond = lambda token: token.string in s
+    cond = _cond(s)
     return next(t for t in tokens if t.type == type and cond(t))
+
+def _cond(s):
+    if s is None:
+        return lambda token: True
+    if isinstance(s, str):
+        return lambda token: token.string == s
+    return lambda token: token.string in s
 
 
 @debug_time
